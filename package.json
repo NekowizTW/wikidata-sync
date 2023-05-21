@@ -1,0 +1,19 @@
+{
+  "name": "wikidata-sync",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "crawler.js",
+  "scripts": {
+    "test": "node crawler.js",
+    "cardBase": "node crawler/cards/cardBase.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "listr2": "^6.4.2",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.1"
+  }
+}
