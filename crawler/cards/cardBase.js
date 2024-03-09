@@ -32,6 +32,17 @@ const queryParamsP = {
 const delay = retryCount =>
   new Promise(resolve => setTimeout(resolve, 10 ** retryCount));
 
+// https://medium.com/@drdDavi/split-a-javascript-array-into-chunks-d90c90de3a2d
+const splitArrayChunks = (array, n) => {
+  const result = [];
+
+  for (let i = 0; i < array.length; i += n) {
+    result.push(array.slice(i, i + n));
+  }
+
+  return result;
+}
+
 async function fetchRetry (url, retryCnt = 0, lastError = null) {
   if (retryCnt === 5) throw new Error(lastError);
 
@@ -502,7 +513,20 @@ const tasks = new Listr([
   {
     title: 'Writing JSON Files',
     task: async (ctx, task) => {
-      await writeJSON('cardData', skill_mapper(data_deck), task)
+      const chunkSize = 5000
+      const { card, Senzai } = skill_mapper(data_deck)
+      const chunkedCards = splitArrayChunks(card, chunkSize)
+      await Promise.all(
+        chunkedCards.map(async (chunkCard, idx) => {
+          await writeJSON(`chunkCard-${idx}`, chunkCard, task)
+        })
+      )
+      // NOTE: Leave manifest in original file
+      await writeJSON('cardData', {
+        prefix: 'chunkCard-',
+        count: chunkedCards.length,
+        Senzai,
+      }, task)
       await writeJSON('exCard', data_deck.exCards, task)
       await Promise.all(
         ['Senzai', 'Answer', 'Special', 'Answer2', 'Special2', 'EXAS'].map(async typeOfSkill => {
