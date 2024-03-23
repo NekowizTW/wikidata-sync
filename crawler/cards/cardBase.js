@@ -77,10 +77,13 @@ async function querySourceCardPages (gapcontinue, rawPages, task) {
   else return querySourceCardPages(data['continue'].gapcontinue, rawPages, task)
 }
 
-async function querySourceSkillPage (type) {
+async function querySourceSkillPage (type, year = undefined) {
   // setting up params
+  let titles = type === 'Senzai' ? `模板:Senzai/Data` : `模板:Skill/${type}/Data`
+  if (!!year) titles += `/${year}`
+
   const params = Object.assign({
-    'titles': type === 'Senzai' ? `模板:Senzai/Data` : `模板:Skill/${type}/Data`,
+    'titles': titles,
   }, queryParamsP)
 
   // add param as url search, get data by fetch
@@ -455,9 +458,30 @@ const tasks = new Listr([
     }
   },
   {
-    title: 'Fetching Skills',
+    title: 'Fetching Skills with years',
     task: () => {
-      const typeOfSkills = ['Senzai', 'Answer', 'Special', 'Answer2', 'Special2', 'EXAS']
+      const typeOfSkills = ['Answer', 'Special', 'Answer2', 'Special2']
+      return new Listr(typeOfSkills.map(skillType => {
+        return {
+          title: `Fetching ${skillType}`,
+          task: async (ctx, task) => {
+            const skill2015 = await querySourceSkillPage(skillType, '2015')
+              .then(page => querySkillsInPage(page, skillType, task))
+            const skill2018 = await querySourceSkillPage(skillType, '2018')
+              .then(page => querySkillsInPage(page, skillType, task))
+            const skill = await querySourceSkillPage(skillType)
+              .then(page => querySkillsInPage(page, skillType, task))
+
+            data_deck[skillType] = _.uniqBy([...skill2015, ...skill2018, ...skill], 'name');
+          }
+        }
+      }))
+    }
+  },
+  {
+    title: 'Fetching EXAS, Senzai',
+    task: () => {
+      const typeOfSkills = ['EXAS', 'Senzai']
       return new Listr(typeOfSkills.map(skillType => {
         return {
           title: `Fetching ${skillType}`,
