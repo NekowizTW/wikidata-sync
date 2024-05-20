@@ -19,7 +19,7 @@ function config_build (config) {
 }
 
 class Skill {
-	constructor (skill_type, skill_info) {
+	constructor (skill_type = "", skill_info = "") {
 		skill_info = skill_info.replace(/（效果值：(\d+|\?)）/, '');
 		this.coefficients = this.splitCoefficients(skill_info);
 		this.segments = skill_info.replace(this.coefficients, '').trim().split(/[，|；]/);
