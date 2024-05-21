@@ -224,7 +224,7 @@ function querySkillsInPage (response, type, task) {
     if (!inBracket && lines[idx].indexOf('{{ #switch: {{{data}}}') !== -1) {
       inBracket = true
       while ((m = re_h.exec(lines[idx])) !== null) {
-        skill.name = m[1]
+        skill.name = m[1].trim()
       }
     }
     // type 2: When we are in bracket, we found right bracket.
@@ -240,7 +240,7 @@ function querySkillsInPage (response, type, task) {
     // Action: Parse attributes for this skill.
     else if (inBracket) {
       while ((m = re.exec(lines[idx])) !== null) {
-        skill[m[1]] = m[2]
+        skill[m[1]] = m[2].trim()
       }
     }
     // type 4: We are not in bracket.
