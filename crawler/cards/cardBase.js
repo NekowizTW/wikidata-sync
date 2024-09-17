@@ -381,7 +381,9 @@ function queryleaderEXsInPage (response, task) {
     // Action: Save this leaderEX.
     else if (bracketLevel === 2 && lines[idx].indexOf('}}') !== -1) {
       bracketLevel = 1
-      leaderEX.small_filename = `精靈大結晶_${leaderEX.name}${leaderEX.rank.replace(/\d$/, '')}.png`
+      // 庫西（自製）
+      const namePrefix = `精靈大結晶_${leaderEX.name.replace('（自製）', '')}`
+      leaderEX.small_filename = `${namePrefix}${leaderEX.rank.replace(/\d$/, '')}.png`
       leaderEXs.push(leaderEX)
       /* task.output = `Parsed ${leaderEXs.length} LeaderEXs.` */
       leaderEX = {}
