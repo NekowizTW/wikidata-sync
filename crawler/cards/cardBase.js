@@ -474,7 +474,8 @@ const tasks = new Listr([
             const skill = await querySourceSkillPage(skillType)
               .then(page => querySkillsInPage(page, skillType, task))
 
-            data_deck[skillType] = _.uniqBy([...skill2015, ...skill2018, ...skill], 'name');
+            // NOTE: For lodash unique mechanism and community update priority, reverse the ordering.
+            data_deck[skillType] = _.uniqBy([...skill, ...skill2018, ...skill2015], 'name');
           }
         }
       }))
@@ -564,7 +565,7 @@ const tasks = new Listr([
     }
   }
 ], {
-  renderer: 'silent'
+  renderer: process.env.RENDERER || 'default'
 })
 
 tasks.run().catch(err => {

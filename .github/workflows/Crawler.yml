@@ -35,6 +35,8 @@ jobs:
 
       - name: Crawing cards from wiki
         run: npm run cardBase
+        env:
+          RENDERER: silent
 
       # ----------------------------------------------------------------
 
