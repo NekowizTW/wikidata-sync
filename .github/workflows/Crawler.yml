@@ -16,7 +16,7 @@ jobs:
 
       - name: Get Current Date
         id: date
-        run: echo "date=$(date + '%Y%m%d')" >> $GITHUB_OUTPUT
+        run: echo "date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
       
       - name: Create folder for data
         run: mkdir -p data/cards
