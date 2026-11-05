@@ -1,47 +1,75 @@
 name: Crawler
-on: 
+
+on:
   push:
   schedule:
-    - cron:  "0 3 * * wed,sat" # 要用臺灣時間減8小時
+    - cron: "0 3 * * wed,sat" # 要用臺灣時間減8小時
+
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       # ----------------------------------------------------------------
 
       - name: Get Current Date
         id: date
         run: echo "date=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
-      
+
       - name: Create folder for data
         run: mkdir -p data/cards
 
       # ----------------------------------------------------------------
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: lts/iron
-      
-      - name: Install dependency
-        run: npm install
+          node-version: lts/krypton
+
+      - name: Enable pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: latest
+          run_install: false
+
+      - name: Setup pnpm cache
+        run: pnpm store path
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       # ----------------------------------------------------------------
 
       - name: Crawing cards from wiki
-        run: npm run cardBase
+        run: pnpm run cardBase
         env:
           RENDERER: silent
 
       # ----------------------------------------------------------------
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
         with:
-          folder: data # The folder the action should deploy.
-          commit-message: Wiki Snapshot ${{ steps.date.outputs.date }}
+          path: data
+
+      # ----------------------------------------------------------------
+
+      - name: Deploy to GitHub Pages Branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./data
+          publish_branch: gh-pages
+          commit_message: "Wiki Snapshot ${{ steps.date.outputs.date }}"
+          force_orphan: false
